@@ -57,7 +57,7 @@
         .draw-button {
             padding: 10px 20px;
             font-size: 18px;
-            background-color: #007bff;
+            background-color: #28a745; /* 微淺的綠色 */
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -66,31 +66,65 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         .draw-button:hover {
-            background-color: #0056b3;
+            background-color: #218838; /* 鼠標懸停時的深綠色 */
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .other-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff; /* 藍色 */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .other-button:hover {
+            background-color: #0056b3; /* 鼠標懸停時的深藍色 */
         }
     </style>
 </head>
 <body>
     <h1>2024聖誕交換禮物</h1>
-	<h2>抽籤主題(一) 顏色</h2>
+    <h2 id="theme-title">抽籤主題(一) 顏色</h2>
     <div class="container">
         <div class="lottery-machine" id="machine">
             <!-- 動態生成的球將出現在這裡 -->
         </div>
-        <button class="draw-button" onclick="startLottery()">抽籤</button>
+        <div class="button-group">
+            <button class="other-button" id="left-button" onclick="changeLots('texture')">觸感</button>
+            <button class="draw-button" onclick="startLottery()">抽籤</button>
+            <button class="other-button" id="right-button" onclick="changeLots('scenario')">情境</button>
+        </div>
     </div>
 
     <script>
-        const lots = [
-            "紅紅的",
-            "藍藍的",
-            "白白的",
-            "黑黑的",
-            "綠綠的",
-            "黃黃的",
-            "棕棕的",
-            "彩虹的"
-        ];
+        let currentTheme = 'color'; // 預設為顏色
+        const themes = {
+            color: {
+                lots: ["紅紅的", "藍藍的", "白白的", "黑黑的", "綠綠的", "黃黃的", "棕棕的", "彩虹的"],
+                title: "顏色",
+                left: '觸感',
+                right: '情境'
+            },
+            texture: {
+                lots: ["粗糙的", "硬硬的", "溫溫的", "尖尖的", "圓滑的", "柔軟的", "濕潤的", "粘稠的"],
+                title: "觸感",
+                left: '顏色',
+                right: '情境'
+            },
+            scenario: {
+                lots: ["工作時", "學校時", "洗澡時", "煩惱時", "開心時", "吃飯時", "狂歡時", "過年時"],
+                title: "情境",
+                left: '顏色',
+                right: '觸感'
+            }
+        };
 
         let interval;
 
@@ -101,10 +135,10 @@
             machine.innerHTML = "";
 
             // 動態生成彩球
-            for (let i = 0; i < lots.length; i++) {
+            for (let i = 0; i < themes[currentTheme].lots.length; i++) {
                 const ball = document.createElement("div");
                 ball.className = "ball";
-                ball.textContent = lots[i];
+                ball.textContent = themes[currentTheme].lots[i];
                 ball.style.left = `${Math.random() * 250}px`;
                 ball.style.top = `${Math.random() * 250}px`;
                 ball.style.backgroundColor = getRandomColor();
@@ -123,8 +157,8 @@
             // 停止動態效果並顯示結果
             setTimeout(() => {
                 clearInterval(interval);
-                const randomIndex = Math.floor(Math.random() * lots.length);
-                const chosenLot = lots[randomIndex];
+                const randomIndex = Math.floor(Math.random() * themes[currentTheme].lots.length);
+                const chosenLot = themes[currentTheme].lots[randomIndex];
                 machine.innerHTML = ""; // 清空彩球
                 const resultBall = document.createElement("div");
                 resultBall.className = "ball";
@@ -134,6 +168,14 @@
                 resultBall.style.backgroundColor = getRandomColor();
                 machine.appendChild(resultBall);
             }, 3000); // 動態持續3秒
+        }
+
+        function changeLots(theme) {
+            currentTheme = theme; // 切換主題
+            const themeData = themes[theme];
+            document.getElementById("theme-title").textContent = `抽籤主題(${theme === 'color' ? '一' : theme === 'texture' ? '二' : '三'}) ${themeData.title}`;
+            document.getElementById("left-button").textContent = themeData.left;
+            document.getElementById("right-button").textContent = themeData.right;
         }
 
         function getRandomColor() {
