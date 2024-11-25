@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聖誕樂透彩球機</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url("https://imgur.com/FMitQSG.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .container {
+            margin-top: 50px;
+            position: relative;
+        }
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .lottery-machine {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            border: 5px solid #aaa;
+            border-radius: 50%;
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .ball {
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 50px;
+            text-align: center;
+            border-radius: 50%;
+            position: absolute;
+            animation: bounce 0.5s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        .draw-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #28a745; /* 微淺的綠色 */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .draw-button:hover {
+            background-color: #218838; /* 鼠標懸停時的深綠色 */
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .other-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff; /* 藍色 */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .other-button:hover {
+            background-color: #0056b3; /* 鼠標懸停時的深藍色 */
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="input-section" class="input-section">
+        <h1>輸入您的姓名</h1>
+        <input type="text" id="user-id" placeholder="請輸入您的姓名" />
+        <button class="draw-button" onclick="startApp()">確認</button>
+    </div>
+
+    <div id="lottery-section" class="container hidden">
+        <h1>2024聖誕交換禮物</h1>
+        <h2 id="theme-title">抽籤主題(一) 顏色</h2>
+        <div class="lottery-machine" id="machine">
+            <!-- 動態生成的球將出現在這裡 -->
+        </div>
+        <div class="button-group">
+            <button class="other-button" id="left-button" onclick="changeLots('texture')">觸感</button>
+            <button class="draw-button" onclick="startLottery()">抽籤</button>
+            <button class="other-button" id="right-button" onclick="changeLots('scenario')">情境</button>
+        </div>
+    </div>
+
+    <script>
+        let currentTheme = 'color'; // 預設為顏色
+        const themes = {
+            color: {
+                lots: ["紅紅的", "藍藍的", "白白的", "黑黑的", "綠綠的", "黃黃的", "棕棕的", "彩虹的"],
+                title: "顏色",
+                left: '觸感',
+                right: '情境'
+            },
+            texture: {
+                lots: ["粗糙的", "硬硬的", "溫溫的", "尖尖的", "圓滑的", "柔軟的", "濕潤的", "粘稠的"],
+                title: "觸感",
+                left: '顏色',
+                right: '情境'
+            },
+            scenario: {
+                lots: ["工作時", "學校時", "洗澡時", "煩惱時", "開心時", "吃飯時", "狂歡時", "過年時"],
+                title: "情境",
+                left: '顏色',
+                right: '觸感'
+            }
+        };
+
+        let interval;
+
+        function startApp() {
+            const userId = document.getElementById("user-id").value;
+            if (!userId) {
+                alert("請輸入姓名！");
+                return;
+            }
+            localStorage.setItem("userId", userId);
+            document.getElementById("input-section").classList.add("hidden");
+            document.getElementById("lottery-section").classList.remove("hidden");
+        }
+
+        function startLottery() {
+            const userId = localStorage.getItem("userId");
+            console.log("目前的使用者:", userId);
+
+            const machine = document.getElementById("machine");
+            machine.innerHTML = ""; // 清空之前的內容
+
+            for (let i = 0; i < themes[currentTheme].lots.length; i++) {
+                const ball = document.createElement("div");
+                ball.className = "ball";
+                ball.textContent = themes[currentTheme].lots[i];
+                ball.style.left = `${Math.random() * 250}px`;
+                ball.style.top = `${Math.random() * 250}px`;
+                ball.style.backgroundColor = getRandomColor();
+                machine.appendChild(ball);
+            }
+
+            interval = setInterval(() => {
+                const balls = document.querySelectorAll(".ball");
+                balls.forEach(ball => {
+                    ball.style.left = `${Math.random() * 250}px`;
+                    ball.style.top = `${Math.random() * 250}px`;
+                });
+            }, 200);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                const randomIndex = Math.floor(Math.random() * themes[currentTheme].lots.length);
+                const chosenLot = themes[currentTheme].lots[randomIndex];
+                machine.innerHTML = "";
+                const resultBall = document.createElement("div");
+                resultBall.className = "ball";
+                resultBall.textContent = chosenLot;
+                resultBall.style.left = "125px";
+                resultBall.style.top = "125px";
+                resultBall.style.backgroundColor = getRandomColor();
+                machine.appendChild(resultBall);
+
+                console.log("使用者", userId, "抽中了:", chosenLot);
+            }, 3000);
+        }
+
+		function changeLots(theme) {
+			currentTheme = theme; // 更新目前的主題
+			const themeData = themes[theme];
+			// 更新標題文字
+			document.getElementById("theme-title").textContent = `抽籤主題(${theme === 'color' ? '一' : theme === 'texture' ? '二' : '三'}) ${themeData.title}`;
+			// 更新按鈕文字
+			document.getElementById("left-button").textContent = themeData.left;
+			document.getElementById("right-button").textContent = themeData.right;
+			// 更新按鈕的 onclick 屬性
+			document.getElementById("left-button").setAttribute("onclick", `changeLots('${themeData.left === '顏色' ? 'color' : themeData.left === '觸感' ? 'texture' : 'scenario'}')`);
+			document.getElementById("right-button").setAttribute("onclick", `changeLots('${themeData.right === '顏色' ? 'color' : themeData.right === '觸感' ? 'texture' : 'scenario'}')`);
+		}
+
+
+        function getRandomColor() {
+            const letters = "0123456789ABCDEF";
+            let color = "#";
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    </script>
+</body>
+</html>
