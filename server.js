@@ -56,7 +56,7 @@ app.post("/save-draw-result", async (req, res) => {
 });
 
 // 啟動伺服器
-const PORT = 3000;
+const PORT = 1433;
 app.listen(PORT, () => {
     console.log(`伺服器正在執行，網址：http://localhost:${PORT}`);
 });
