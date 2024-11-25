@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聖誕樂透彩球機</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url("https://imgur.com/FMitQSG.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .container {
+            margin-top: 50px;
+            position: relative;
+        }
+        .lottery-machine {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            border: 5px solid #aaa;
+            border-radius: 50%;
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .ball {
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 50px;
+            text-align: center;
+            border-radius: 50%;
+            position: absolute;
+            animation: bounce 0.5s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        .draw-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .draw-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>2024聖誕交換禮物</h1>
+	<h2>抽籤主題(一) 顏色</h2>
+    <div class="container">
+        <div class="lottery-machine" id="machine">
+            <!-- 動態生成的球將出現在這裡 -->
+        </div>
+        <button class="draw-button" onclick="startLottery()">抽籤</button>
+    </div>
+
+    <script>
+        const lots = [
+            "紅紅的",
+            "藍藍的",
+            "白白的",
+            "黑黑的",
+            "綠綠的",
+            "黃黃的",
+            "棕棕的",
+            "彩虹的"
+        ];
+
+        let interval;
+
+        function startLottery() {
+            const machine = document.getElementById("machine");
+
+            // 清空之前的內容
+            machine.innerHTML = "";
+
+            // 動態生成彩球
+            for (let i = 0; i < lots.length; i++) {
+                const ball = document.createElement("div");
+                ball.className = "ball";
+                ball.textContent = lots[i];
+                ball.style.left = `${Math.random() * 250}px`;
+                ball.style.top = `${Math.random() * 250}px`;
+                ball.style.backgroundColor = getRandomColor();
+                machine.appendChild(ball);
+            }
+
+            // 模擬抽籤動態效果
+            interval = setInterval(() => {
+                const balls = document.querySelectorAll(".ball");
+                balls.forEach(ball => {
+                    ball.style.left = `${Math.random() * 250}px`;
+                    ball.style.top = `${Math.random() * 250}px`;
+                });
+            }, 200);
+
+            // 停止動態效果並顯示結果
+            setTimeout(() => {
+                clearInterval(interval);
+                const randomIndex = Math.floor(Math.random() * lots.length);
+                const chosenLot = lots[randomIndex];
+                machine.innerHTML = ""; // 清空彩球
+                const resultBall = document.createElement("div");
+                resultBall.className = "ball";
+                resultBall.textContent = chosenLot;
+                resultBall.style.left = "125px";
+                resultBall.style.top = "125px";
+                resultBall.style.backgroundColor = getRandomColor();
+                machine.appendChild(resultBall);
+            }, 3000); // 動態持續3秒
+        }
+
+        function getRandomColor() {
+            const letters = "0123456789ABCDEF";
+            let color = "#";
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    </script>
+</body>
+</html>
