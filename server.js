@@ -1,20 +1,23 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const sql = require("mssql");
+const path = require("path");
 
-// 建立 Express 應用程式
 const app = express();
 app.use(bodyParser.json());
 
+// 提供靜態檔案
+app.use(express.static(path.join(__dirname, "public")));
+
 // 資料庫連線設定
 const dbConfig = {
-    user: "sa", // 資料庫使用者名稱
-    password: "123123", // 資料庫密碼
-    server: "localhost", // 或伺服器 IP
-    database: "LotteryDB", // 資料庫名稱
+    user: "sa",
+    password: "123123",
+    server: "localhost",
+    database: "LotteryDB",
     options: {
-        encrypt: false, // 如果是本地資料庫，設為 false
-        trustServerCertificate: true, // 解決自簽名憑證問題
+        encrypt: false,
+        trustServerCertificate: true,
     },
 };
 
@@ -31,16 +34,16 @@ testConnection();
 
 // POST API：儲存抽籤結果
 app.post("/save-draw-result", async (req, res) => {
-    const { id, result1, result2, result3 } = req.body; // 從請求中取得結果
-    const timestamp = new Date(); // 記錄抽籤時間
+    const { id, result1, result2, result3 } = req.body;
+    const timestamp = new Date();
 
     try {
         const pool = await sql.connect(dbConfig);
         await pool.request()
-		.input("id", sql.NVarChar(50), id)
-		.input("result1", sql.NVarChar(50), result1)
-		.input("result2", sql.NVarChar(50), result2)
-		.input("result3", sql.NVarChar(50), result3)
+            .input("id", sql.NVarChar(50), id)
+            .input("result1", sql.NVarChar(50), result1)
+            .input("result2", sql.NVarChar(50), result2)
+            .input("result3", sql.NVarChar(50), result3)
             .input("timestamp", sql.DateTime, timestamp)
             .query("INSERT INTO ResultData (Id, Result1, Result2, Result3, Timestamp) VALUES (@id, @result1, @result2, @result3, @timestamp)");
 
