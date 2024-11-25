@@ -15,6 +15,7 @@ const dbConfig = {
     password: "123123",
     server: "localhost",
     database: "LotteryDB",
+    port: 1433,
     options: {
         encrypt: false,
         trustServerCertificate: true,
