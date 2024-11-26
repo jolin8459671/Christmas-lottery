@@ -64,7 +64,7 @@
         .draw-button {
             padding: 10px 20px;
             font-size: 18px;
-            background-color: #28a745; /* 微淺的綠色 */
+            background-color: #28a745;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -73,18 +73,19 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         .draw-button:hover {
-            background-color: #218838; /* 鼠標懸停時的深綠色 */
+            background-color: #218838;
         }
         .button-group {
             margin-top: 20px;
             display: flex;
             justify-content: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .other-button {
             padding: 10px 20px;
             font-size: 18px;
-            background-color: #007bff; /* 藍色 */
+            background-color: #007bff;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -92,7 +93,13 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         .other-button:hover {
-            background-color: #0056b3; /* 鼠標懸停時的深藍色 */
+            background-color: #0056b3;
+        }
+        .result-display {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
         }
         .hidden {
             display: none;
@@ -117,6 +124,8 @@
             <button class="draw-button" onclick="startLottery()">抽籤</button>
             <button class="other-button" id="right-button" onclick="changeLots('scenario')">情境</button>
         </div>
+        <button class="draw-button" onclick="showResults()">呈現結果</button>
+        <div id="result-display" class="result-display"></div>
     </div>
 
     <script>
@@ -142,7 +151,11 @@
             }
         };
 
-        let interval;
+        let results = {
+            color: null,
+            texture: null,
+            scenario: null
+        };
 
         function startApp() {
             const userId = document.getElementById("user-id").value;
@@ -162,54 +175,39 @@
             const machine = document.getElementById("machine");
             machine.innerHTML = ""; // 清空之前的內容
 
-            for (let i = 0; i < themes[currentTheme].lots.length; i++) {
-                const ball = document.createElement("div");
-                ball.className = "ball";
-                ball.textContent = themes[currentTheme].lots[i];
-                ball.style.left = `${Math.random() * 250}px`;
-                ball.style.top = `${Math.random() * 250}px`;
-                ball.style.backgroundColor = getRandomColor();
-                machine.appendChild(ball);
-            }
+            const randomIndex = Math.floor(Math.random() * themes[currentTheme].lots.length);
+            const chosenLot = themes[currentTheme].lots[randomIndex];
+            results[currentTheme] = chosenLot; // 記錄結果
 
-            interval = setInterval(() => {
-                const balls = document.querySelectorAll(".ball");
-                balls.forEach(ball => {
-                    ball.style.left = `${Math.random() * 250}px`;
-                    ball.style.top = `${Math.random() * 250}px`;
-                });
-            }, 200);
+            machine.innerHTML = "";
+            const resultBall = document.createElement("div");
+            resultBall.className = "ball";
+            resultBall.textContent = chosenLot;
+            resultBall.style.left = "125px";
+            resultBall.style.top = "125px";
+            resultBall.style.backgroundColor = getRandomColor();
+            machine.appendChild(resultBall);
 
-            setTimeout(() => {
-                clearInterval(interval);
-                const randomIndex = Math.floor(Math.random() * themes[currentTheme].lots.length);
-                const chosenLot = themes[currentTheme].lots[randomIndex];
-                machine.innerHTML = "";
-                const resultBall = document.createElement("div");
-                resultBall.className = "ball";
-                resultBall.textContent = chosenLot;
-                resultBall.style.left = "125px";
-                resultBall.style.top = "125px";
-                resultBall.style.backgroundColor = getRandomColor();
-                machine.appendChild(resultBall);
-
-                console.log("使用者", userId, "抽中了:", chosenLot);
-            }, 3000);
+            console.log("使用者", userId, "抽中了:", chosenLot);
         }
 
-		function changeLots(theme) {
-			currentTheme = theme; // 更新目前的主題
-			const themeData = themes[theme];
-			// 更新標題文字
-			document.getElementById("theme-title").textContent = `抽籤主題(${theme === 'color' ? '一' : theme === 'texture' ? '二' : '三'}) ${themeData.title}`;
-			// 更新按鈕文字
-			document.getElementById("left-button").textContent = themeData.left;
-			document.getElementById("right-button").textContent = themeData.right;
-			// 更新按鈕的 onclick 屬性
-			document.getElementById("left-button").setAttribute("onclick", `changeLots('${themeData.left === '顏色' ? 'color' : themeData.left === '觸感' ? 'texture' : 'scenario'}')`);
-			document.getElementById("right-button").setAttribute("onclick", `changeLots('${themeData.right === '顏色' ? 'color' : themeData.right === '觸感' ? 'texture' : 'scenario'}')`);
-		}
+        function showResults() {
+            const resultDisplay = document.getElementById("result-display");
+            const color = results.color || "未選擇";
+            const texture = results.texture || "未選擇";
+            const scenario = results.scenario || "未選擇";
+            resultDisplay.textContent = `形容詞為: ${color} + ${texture} + ${scenario}`;
+        }
 
+        function changeLots(theme) {
+            currentTheme = theme; // 更新目前的主題
+            const themeData = themes[theme];
+            document.getElementById("theme-title").textContent = `抽籤主題(${theme === 'color' ? '一' : theme === 'texture' ? '二' : '三'}) ${themeData.title}`;
+            document.getElementById("left-button").textContent = themeData.left;
+            document.getElementById("right-button").textContent = themeData.right;
+            document.getElementById("left-button").setAttribute("onclick", `changeLots('${themeData.left === '顏色' ? 'color' : themeData.left === '觸感' ? 'texture' : 'scenario'}')`);
+            document.getElementById("right-button").setAttribute("onclick", `changeLots('${themeData.right === '顏色' ? 'color' : themeData.right === '觸感' ? 'texture' : 'scenario'}')`);
+        }
 
         function getRandomColor() {
             const letters = "0123456789ABCDEF";
