@@ -116,46 +116,26 @@
     <div id="lottery-section" class="container hidden">
         <h1>2024聖誕交換禮物</h1>
         <h2 id="theme-title">抽籤主題(一) 顏色</h2>
-        <div class="lottery-machine" id="machine">
-            <!-- 動態生成的球將出現在這裡 -->
-        </div>
+        <div class="lottery-machine" id="machine"></div>
         <div class="button-group">
             <button class="other-button" id="left-button" onclick="changeLots('texture')">觸感</button>
             <button class="draw-button" onclick="startLottery()">抽籤</button>
             <button class="other-button" id="right-button" onclick="changeLots('scenario')">情境</button>
         </div>
         <button class="draw-button" onclick="showResults()">呈現結果</button>
+        <button class="draw-button" onclick="saveResults()">儲存結果</button>
         <div id="result-display" class="result-display"></div>
     </div>
 
     <script>
-        let currentTheme = 'color'; // 預設為顏色
+        let currentTheme = 'color';
         const themes = {
-            color: {
-                lots: ["紅紅的", "藍藍的", "白白的", "黑黑的", "綠綠的", "黃黃的", "棕棕的", "彩虹的"],
-                title: "顏色",
-                left: '觸感',
-                right: '情境'
-            },
-            texture: {
-                lots: ["粗糙的", "硬硬的", "溫溫的", "尖尖的", "圓滑的", "柔軟的", "濕潤的", "粘稠的"],
-                title: "觸感",
-                left: '顏色',
-                right: '情境'
-            },
-            scenario: {
-                lots: ["工作時", "學校時", "洗澡時", "煩惱時", "開心時", "吃飯時", "狂歡時", "過年時"],
-                title: "情境",
-                left: '顏色',
-                right: '觸感'
-            }
+            color: { lots: ["紅紅的", "藍藍的", "白白的", "黑黑的", "綠綠的", "黃黃的", "棕棕的", "彩虹的"], title: "顏色", left: '觸感', right: '情境' },
+            texture: { lots: ["粗糙的", "硬硬的", "溫溫的", "尖尖的", "圓滑的", "柔軟的", "濕潤的", "粘稠的"], title: "觸感", left: '顏色', right: '情境' },
+            scenario: { lots: ["工作時", "學校時", "洗澡時", "煩惱時", "開心時", "吃飯時", "狂歡時", "過年時"], title: "情境", left: '顏色', right: '觸感' }
         };
 
-        let results = {
-            color: null,
-            texture: null,
-            scenario: null
-        };
+        let results = { color: null, texture: null, scenario: null };
 
         function startApp() {
             const userId = document.getElementById("user-id").value;
@@ -170,25 +150,26 @@
 
         function startLottery() {
             const userId = localStorage.getItem("userId");
-            console.log("目前的使用者:", userId);
-
             const machine = document.getElementById("machine");
-            machine.innerHTML = ""; // 清空之前的內容
-
             const randomIndex = Math.floor(Math.random() * themes[currentTheme].lots.length);
             const chosenLot = themes[currentTheme].lots[randomIndex];
-            results[currentTheme] = chosenLot; // 記錄結果
+            results[currentTheme] = chosenLot;
+            machine.innerHTML = `<div class="ball" style="background-color:${getRandomColor()};">${chosenLot}</div>`;
+        }
 
-            machine.innerHTML = "";
-            const resultBall = document.createElement("div");
-            resultBall.className = "ball";
-            resultBall.textContent = chosenLot;
-            resultBall.style.left = "125px";
-            resultBall.style.top = "125px";
-            resultBall.style.backgroundColor = getRandomColor();
-            machine.appendChild(resultBall);
-
-            console.log("使用者", userId, "抽中了:", chosenLot);
+        async function saveResults() {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("請先輸入姓名！");
+                return;
+            }
+            const payload = { id: userId, result1: results.color, result2: results.texture, result3: results.scenario };
+            await fetch('http://localhost:3000/save-draw-result', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            alert("結果已儲存！");
         }
 
         function showResults() {
@@ -200,22 +181,13 @@
         }
 
         function changeLots(theme) {
-            currentTheme = theme; // 更新目前的主題
+            currentTheme = theme;
             const themeData = themes[theme];
             document.getElementById("theme-title").textContent = `抽籤主題(${theme === 'color' ? '一' : theme === 'texture' ? '二' : '三'}) ${themeData.title}`;
-            document.getElementById("left-button").textContent = themeData.left;
-            document.getElementById("right-button").textContent = themeData.right;
-            document.getElementById("left-button").setAttribute("onclick", `changeLots('${themeData.left === '顏色' ? 'color' : themeData.left === '觸感' ? 'texture' : 'scenario'}')`);
-            document.getElementById("right-button").setAttribute("onclick", `changeLots('${themeData.right === '顏色' ? 'color' : themeData.right === '觸感' ? 'texture' : 'scenario'}')`);
         }
 
         function getRandomColor() {
-            const letters = "0123456789ABCDEF";
-            let color = "#";
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
+            return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
         }
     </script>
 </body>
