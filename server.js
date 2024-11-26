@@ -1,62 +1,75 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const sql = require("mssql");
-const path = require("path");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const sql = require('mssql'); // 使用 mssql 套件
 
 const app = express();
+const port = 3000;
+
+// 中間件
+app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static('public')); // 提供靜態資源服務（如圖片）
 
-// 提供靜態檔案
-app.use(express.static(path.join(__dirname, "public")));
-
-// 資料庫連線設定
+// MSSQL 資料庫配置
 const dbConfig = {
-    user: "sa",
-    password: "123123",
-    server: "localhost",
-    database: "LotteryDB",
-    port: 1433,
+    user: 'myadmin_0712', // 您的管理員登入帳號
+    password: 'Jolin@1223', // 您設置的密碼
+    server: 'MyLotteryDB.database.windows.net', // SQL Server 的完整名稱
+    database: 'MyLotteryDB', // 資料庫名稱
     options: {
-        encrypt: false,
-        trustServerCertificate: true,
-    },
+        encrypt: true, // Azure SQL 必須啟用加密
+        trustServerCertificate: false
+    }
 };
 
 // 測試資料庫連線
-async function testConnection() {
+const testDBConnection = async () => {
     try {
-        await sql.connect(dbConfig);
-        console.log("資料庫連線成功！");
+        const pool = await sql.connect(dbConfig);
+        console.log('成功連接到 Microsoft Azure SQL 資料庫！');
+        pool.close(); // 測試完成後關閉連線
     } catch (err) {
-        console.error("資料庫連線失敗：", err.message);
+        console.error('資料庫連線失敗：', err);
     }
-}
-testConnection();
+};
+testDBConnection();
 
-// POST API：儲存抽籤結果
-app.post("/save-draw-result", async (req, res) => {
+// API 路由
+app.get('/', (req, res) => {
+    res.send('伺服器已啟動！歡迎使用抽籤服務。');
+});
+
+// 儲存抽籤結果的 API
+app.post('/save-draw-result', async (req, res) => {
     const { id, result1, result2, result3 } = req.body;
-    const timestamp = new Date();
+
+    if (!id || !result1) {
+        return res.status(400).send('缺少必要的參數 id 或 result1');
+    }
 
     try {
         const pool = await sql.connect(dbConfig);
-        await pool.request()
-            .input("id", sql.NVarChar(50), id)
-            .input("result1", sql.NVarChar(50), result1)
-            .input("result2", sql.NVarChar(50), result2)
-            .input("result3", sql.NVarChar(50), result3)
-            .input("timestamp", sql.DateTime, timestamp)
-            .query("INSERT INTO ResultData (Id, Result1, Result2, Result3, Timestamp) VALUES (@id, @result1, @result2, @result3, @timestamp)");
+        const query = `
+            INSERT INTO result_data (id, result1, result2, result3, timestamp)
+            VALUES (@id, @result1, @result2, @result3, GETDATE())
+        `;
 
-        res.status(200).send({ message: "抽籤結果已成功儲存！" });
+        await pool.request()
+            .input('id', sql.VarChar, id)
+            .input('result1', sql.VarChar, result1)
+            .input('result2', sql.VarChar, result2 || null)
+            .input('result3', sql.VarChar, result3 || null)
+            .query(query);
+
+        res.status(200).send('抽籤結果已成功儲存到資料庫');
     } catch (err) {
-        console.error("儲存失敗：", err.message);
-        res.status(500).send({ error: "儲存抽籤結果時出現錯誤" });
+        console.error('儲存抽籤結果時出現錯誤：', err);
+        res.status(500).send('儲存失敗，請稍後再試');
     }
 });
 
 // 啟動伺服器
-const PORT = 1433;
-app.listen(PORT, () => {
-    console.log(`伺服器正在執行，網址：http://localhost:${PORT}`);
+app.listen(port, () => {
+    console.log(`伺服器正在 http://localhost:${port} 運行`);
 });
