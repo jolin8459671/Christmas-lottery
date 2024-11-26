@@ -56,10 +56,10 @@ app.post('/save-draw-result', async (req, res) => {
         `;
 
         await pool.request()
-            .input('id', sql.VarChar, id)
-            .input('result1', sql.VarChar, result1)
-            .input('result2', sql.VarChar, result2 || null)
-            .input('result3', sql.VarChar, result3 || null)
+            .input('id', sql.NVarChar, id)
+            .input('result1', sql.NVarChar, result1)
+            .input('result2', sql.NVarChar, result2 || null)
+            .input('result3', sql.NVarChar, result3 || null)
             .query(query);
 
         res.status(200).send('抽籤結果已成功儲存到資料庫');
