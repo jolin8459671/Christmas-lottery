@@ -164,7 +164,7 @@
                 return;
             }
             const payload = { id: userId, result1: results.color, result2: results.texture, result3: results.scenario };
-            await fetch('http://localhost:3000/save-draw-result', {
+            await fetch('http://104.214.177.85:3000/save-draw-result', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
