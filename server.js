@@ -69,6 +69,27 @@ app.post('/save-draw-result', async (req, res) => {
     }
 });
 
+// 提供抽籤結果的 API
+app.get('/get-draw-result/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('id', sql.VarChar, id)
+            .query('SELECT * FROM result_data WHERE id = @id');
+
+        if (result.recordset.length === 0) {
+            return res.status(404).send('未找到該使用者的抽籤結果');
+        }
+
+        res.status(200).json(result.recordset[0]);
+    } catch (err) {
+        console.error('獲取抽籤結果時出現錯誤：', err);
+        res.status(500).send('伺服器錯誤，請稍後再試');
+    }
+});
+
 // 啟動伺服器
 app.listen(port, () => {
     console.log(`伺服器正在 http://localhost:${port} 運行`);
