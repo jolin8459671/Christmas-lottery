@@ -15,7 +15,7 @@ app.use(express.static('public')); // 提供靜態資源服務（如圖片）
 const dbConfig = {
     user: 'myadmin_0712', // 您的管理員登入帳號
     password: 'Jolin@1223', // 您設置的密碼
-    server: 'MyLotteryDB.database.windows.net', // SQL Server 的完整名稱
+    server: 'myazuresqlotterylserver.database.windows.net', // SQL Server 的完整名稱
     database: 'MyLotteryDB', // 資料庫名稱
     options: {
         encrypt: true, // Azure SQL 必須啟用加密
