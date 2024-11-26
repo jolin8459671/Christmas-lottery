@@ -9,8 +9,9 @@
   "keywords": [],
   "author": "jolin",
   "license": "ISC",
-  "dependencies": {
+"dependencies": {
     "express": "^4.21.1",
-    "mssql": "^11.0.1"
+    "mssql": "^11.0.1",
+    "cors": "^2.8.5"
   }
 }
