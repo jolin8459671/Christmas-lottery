@@ -124,6 +124,7 @@
         </div>
         <button class="draw-button" onclick="showResults()">呈現結果</button>
         <button class="draw-button" onclick="saveResults()">儲存結果</button>
+        <button class="draw-button" onclick="resetLottery()">再抽一次</button>
         <div id="result-display" class="result-display"></div>
     </div>
 
@@ -149,7 +150,6 @@
         }
 
         function startLottery() {
-            const userId = localStorage.getItem("userId");
             const machine = document.getElementById("machine");
             const randomIndex = Math.floor(Math.random() * themes[currentTheme].lots.length);
             const chosenLot = themes[currentTheme].lots[randomIndex];
@@ -178,6 +178,17 @@
             const texture = results.texture || "未選擇";
             const scenario = results.scenario || "未選擇";
             resultDisplay.textContent = `形容詞為: ${color} + ${texture} + ${scenario}`;
+        }
+
+        function resetLottery() {
+            // 清空結果
+            results = { color: null, texture: null, scenario: null };
+            // 清空畫面
+            document.getElementById("machine").innerHTML = "";
+            document.getElementById("result-display").textContent = "";
+            // 重置主題為顏色
+            currentTheme = 'color';
+            document.getElementById("theme-title").textContent = `抽籤主題(一) 顏色`;
         }
 
         function changeLots(theme) {
