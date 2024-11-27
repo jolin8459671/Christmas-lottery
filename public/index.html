@@ -40,27 +40,27 @@
             justify-content: center;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
-        .ball {
-            width: 50px;
-            height: 50px;
-            background-color: #007bff;
-            color: #fff;
-            font-weight: bold;
-            font-size: 16px;
-            line-height: 50px;
-            text-align: center;
-            border-radius: 50%;
-            position: absolute;
-            animation: bounce 0.5s infinite ease-in-out;
-        }
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
+		.ball {
+			width: 50px;
+			height: 50px;
+			background-color: #007bff;
+			color: #fff;
+			font-weight: bold;
+			font-size: 16px;
+			line-height: 50px;
+			text-align: center;
+			border-radius: 50%;
+			position: absolute;
+			animation: bounce 0.5s infinite ease-in-out;
+		}
+		@keyframes bounce {
+			0%, 100% {
+				transform: translateY(0);
+			}
+			50% {
+				transform: translateY(-20px);
+			}
+		}
         .draw-button {
             padding: 10px 20px;
             font-size: 18px;
@@ -149,13 +149,52 @@
             document.getElementById("lottery-section").classList.remove("hidden");
         }
 
-        function startLottery() {
-            const machine = document.getElementById("machine");
-            const randomIndex = Math.floor(Math.random() * themes[currentTheme].lots.length);
-            const chosenLot = themes[currentTheme].lots[randomIndex];
-            results[currentTheme] = chosenLot;
-            machine.innerHTML = `<div class="ball" style="background-color:${getRandomColor()};">${chosenLot}</div>`;
-        }
+		function startLottery() {
+			const machine = document.getElementById("machine");
+			const balls = [];
+			const candidates = themes[currentTheme].lots;
+
+			// 清空之前的內容
+			machine.innerHTML = "";
+
+			// 生成多顆球並隨機位置
+			for (let i = 0; i < 8; i++) { // 生成 8 顆球
+				const ball = document.createElement("div");
+				ball.className = "ball";
+				ball.style.backgroundColor = getRandomColor();
+				ball.style.left = `${Math.random() * 250}px`;
+				ball.style.top = `${Math.random() * 250}px`;
+				ball.textContent = candidates[i % candidates.length]; // 循環顯示候選值
+				machine.appendChild(ball);
+				balls.push(ball);
+			}
+
+			// 每隔 100 毫秒更新球的位置
+			const interval = setInterval(() => {
+				balls.forEach(ball => {
+					ball.style.left = `${Math.random() * 250}px`;
+					ball.style.top = `${Math.random() * 250}px`;
+				});
+			}, 100);
+
+			// 在 3 秒後停止滾動並顯示結果
+			setTimeout(() => {
+				clearInterval(interval); // 停止滾動
+				const randomIndex = Math.floor(Math.random() * candidates.length);
+				const chosenLot = candidates[randomIndex];
+				results[currentTheme] = chosenLot;
+
+				// 清空滾動球並顯示結果
+				machine.innerHTML = ""; // 清空所有球
+				const resultBall = document.createElement("div");
+				resultBall.className = "ball";
+				resultBall.textContent = chosenLot;
+				resultBall.style.backgroundColor = getRandomColor();
+				resultBall.style.left = "125px"; // 固定結果球在中間
+				resultBall.style.top = "125px";
+				machine.appendChild(resultBall);
+			}, 2000); // 3 秒後顯示結果
+		}
 
         async function saveResults() {
             const userId = localStorage.getItem("userId");
